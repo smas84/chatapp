@@ -7,6 +7,7 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from "react" ;
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { getChatRoom, listMessagesByChatRoom } from '../graphql/queries';
+import { onCreateMessage, onUpdateChatRoom } from '../graphql/subscriptions';
 
 const ChatScreen = () => {
   const [chatRoom, setChatRoom] = useState(null);
@@ -19,11 +20,24 @@ const ChatScreen = () => {
     navigation.setOptions({ title: route.params.name });
   }, [route.params]);
 
-  // fetch chatroom
+  // fetching chatroom
   useEffect(() => {
     API.graphql(graphqlOperation(getChatRoom, { id: chatroom_id })).then(
-      (result) => setChatRoom(result.data?.getChatRoom)
+      (result) => {
+        setChatRoom(result.data?.getChatRoom);
+      }
     );
+    // Subscribe to onUpdateChatRoom
+    const subscription = API.graphql(
+      graphqlOperation(onUpdateChatRoom, {filter: { id: { eq: chatroom_id } },})
+    ).subscribe({
+      next: ({ value }) => {
+        setChatRoom((cr) => ({...(cr || {}),...value.data.onUpdateChatRoom,}));
+      },
+      error: (error) => console.warn(error),
+    });
+    // Stop receiving data updates from the subscription
+    return () => subscription.unsubscribe();
   }, [chatroom_id]);
 
   // fetching the messages 
@@ -37,6 +51,20 @@ const ChatScreen = () => {
       setMessages(result.data?.listMessagesByChatRoom?.items)
       }
     );
+
+    // subscribe to new messages
+    const subscription = API.graphql(
+      graphqlOperation(onCreateMessage, {filter: { chatroomID: { eq: chatroom_id } },})
+      ).subscribe({
+      next: ({ value }) => {
+        setMessages((m) => [value.data.onCreateMessage, ...m]);
+      },
+      error: (err) => console.warn(err),
+    });
+    
+    // Stop receiving data updates from the subscription
+    return () => subscription.unsubscribe();
+
   }, [chatroom_id]);
 
   if (!chatRoom){
