@@ -32,10 +32,12 @@ const ChatListItem = ({ chat }) => {
 				{/* Row */}
 				<View style={styles.row}>
 	        <Text numberOfLines={1} style={styles.name}>{user?.name}</Text>
-		      <Text style={styles.subTitle}>{dayjs(chat.lastMessage?.createdAt).fromNow(true)}</Text>
+          {chat.LastMessage && (
+		       <Text style={styles.subTitle}>{dayjs(chat.LastMessage?.createdAt).fromNow(true)}</Text>
+          )}
 	      </View>
         {/* Message body */}
-        <Text numberOfLines={2} style={styles.subTitle}>{chat.lastMessage?.text}</Text>
+        <Text numberOfLines={2} style={styles.subTitle}>{chat.LastMessage?.text}</Text>
       </View>
     </Pressable>
   );
