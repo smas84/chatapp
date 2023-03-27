@@ -8,6 +8,7 @@ import {useEffect, useState} from "react" ;
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { getChatRoom, listMessagesByChatRoom } from '../graphql/queries';
 import { onCreateMessage, onUpdateChatRoom } from '../graphql/subscriptions';
+import { Feather } from '@expo/vector-icons';
 
 const ChatScreen = () => {
   const [chatRoom, setChatRoom] = useState(null);
@@ -17,14 +18,21 @@ const ChatScreen = () => {
   const chatroom_id = route.params.id ; 
   
   useEffect(() => {
-    navigation.setOptions({ title: route.params.name });
-  }, [route.params]);
+    navigation.setOptions({ title: route.params.name, headerRight: () => 
+      <Feather 
+        onPress={() => navigation.navigate("Group Info", {id: chatroom_id})}
+        name="more-vertical" 
+        size={24} 
+        color="gray" 
+      />
+    });
+  }, [route.params,chatroom_id]);
 
   // fetching chatroom
   useEffect(() => {
     API.graphql(graphqlOperation(getChatRoom, { id: chatroom_id })).then(
       (result) => {
-        setChatRoom(result.data?.getChatRoom);
+        setChatRoom(result.data?.getChatRoom || null);
       }
     );
     // Subscribe to onUpdateChatRoom
@@ -45,9 +53,8 @@ const ChatScreen = () => {
     API.graphql(graphqlOperation(listMessagesByChatRoom, {
       chatroomID: chatroom_id,
       sortDirection: "DESC",
-      })
+    })
     ).then((result) => {
-      console.log(result)
       setMessages(result.data?.listMessagesByChatRoom?.items)
       }
     );

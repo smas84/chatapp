@@ -4,8 +4,12 @@ export const listChatRooms = /* GraphQL */ `
             id
             ChatRooms {
                 items {
+                    _deleted
                     chatRoom {
                         id
+                        updatedAt
+                        name
+                        image
                         users {
                             items {
                                 user {
@@ -17,6 +21,7 @@ export const listChatRooms = /* GraphQL */ `
                         }
                         LastMessage {
                             id
+                            createdAt
                             text
                         }
                     }

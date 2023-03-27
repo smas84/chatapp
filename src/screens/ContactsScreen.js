@@ -27,9 +27,8 @@ const ContactsScreen = () => {
     const newChatRoomData = await API.graphql(
       graphqlOperation(createChatRoom, {input: {}})
     );
-    // console.log(newChatRoomData);
     if (!newChatRoomData.data?.createChatRoom){
-      // console.log("Error creating the chatroom")
+      console.log("Error creating the chatroom")
     }
       // Create a new chatroom  
     const newChatRoom = newChatRoomData.data?.createChatRoom;
